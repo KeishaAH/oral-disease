@@ -475,14 +475,6 @@
                     <span class="confidence-val" id="confidenceText">0%</span>
                 </div>
 
-                <div id="top3Box" style="margin-bottom: 1.25rem; display:none;">
-                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-                        Top-3 predictions
-                    </p>
-                    <div id="top3List" style="display:flex; flex-direction:column; gap:8px;"></div>
-                </div>
-
-
                 <div class="advice-box">
                     <i class="fa-solid fa-user-doctor advice-icon" id="adviceIcon"></i>
                     <div>
@@ -641,28 +633,10 @@
             const adviceText = document.getElementById('adviceText');
             const statusDot = document.getElementById('statusDot');
             const adviceIcon = document.getElementById('adviceIcon');
-            const top3Box = document.getElementById('top3Box');
-            const top3List = document.getElementById('top3List');
 
             // Set Data
             diseaseName.innerText = data.class;
             confidenceText.innerText = Math.round(data.confidence) + '%';
-
-            // Render top-3 list (if provided)
-            if (data.topk && data.topk.length) {
-            top3List.innerHTML = data.topk.slice(0, 3).map((item, idx) => {
-                return `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:white; border:1px solid var(--border); border-radius:10px; padding:10px 12px;">
-                    <span style="font-weight:600; color:var(--text-main);">${idx + 1}. ${item.class}</span>
-                    <span style="font-weight:600; color:var(--text-muted);">${item.prob}%</span>
-                </div>
-                `;
-            }).join('');
-            top3Box.style.display = 'block';
-            } else {
-            top3Box.style.display = 'none';
-            }
-
             
             // Color Coding Logic
             confidenceBar.className = 'meter-fill'; // Reset classes
