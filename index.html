@@ -586,65 +586,45 @@
 
         // --- Main Prediction Logic (Simulated) ---
         async function predict() {
-  if (analyzeBtn.disabled) return;
-  if (!fileInput.files || !fileInput.files[0]) {
-    alert("Please upload an image first.");
-    return;
-  }
+            if (analyzeBtn.disabled) return;
 
-  // UI Loading State
-  const btnTextEl = analyzeBtn.querySelector('.btn-text');
-  const spinnerEl = analyzeBtn.querySelector('.spinner');
+            const btnTextEl = analyzeBtn.querySelector('.btn-text');
+            const spinnerEl = analyzeBtn.querySelector('.spinner');
 
-  btnTextEl.style.display = 'none';
-  spinnerEl.style.display = 'block';
-  analyzeBtn.disabled = true;
-  resultCard.classList.remove('active');
+            btnTextEl.style.display = 'none';
+            spinnerEl.style.display = 'block';
+            analyzeBtn.disabled = true;
+            resultCard.classList.remove('active');
 
-  try {
-    // CHANGE THIS when deployed:
-    const API_BASE = "http://localhost:8080";
+            try {
+                const file = fileInput.files[0];
+                const formData = new FormData();
+                formData.append("file", file);
 
-    const formData = new FormData();
-    formData.append("file", fileInput.files[0]);
+                const API_BASE = "https://oral-api-286824618606.asia-southeast1.run.app/"; // <-- paste your Cloud Run URL
+                const res = await fetch(`${API_BASE}/predict?top_k=3`, {
+                method: "POST",
+                body: formData
+                });
 
-    const res = await fetch(`${API_BASE}/predict?top_k=3`, {
-      method: "POST",
-      body: formData
-    });
+                if (!res.ok) throw new Error("API error " + res.status);
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text);
-    }
+                const data = await res.json(); // {top1:{class,prob}, topk:[...]}
+                displayResult({
+                class: data.top1.class,
+                confidence: (data.top1.prob * 100).toFixed(1)
+                });
 
-    const data = await res.json();
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                btnTextEl.style.display = 'block';
+                spinnerEl.style.display = 'none';
+                analyzeBtn.disabled = false;
+                analyzeBtn.querySelector('.btn-text').innerText = "Analyze Again";
+            }
+            }
 
-    // Your backend returns: { top1: {class, prob}, topk: [...] }
-    const predClass = data.top1.class;
-    const confidence = (data.top1.prob * 100).toFixed(1);
-
-    displayResult({
-      class: predClass,
-      confidence: confidence
-    });
-
-    // Reset Button State
-    btnTextEl.style.display = 'block';
-    spinnerEl.style.display = 'none';
-    analyzeBtn.disabled = false;
-    analyzeBtn.querySelector('.btn-text').innerText = "Analyze Again";
-
-  } catch (err) {
-    console.error(err);
-    alert("Prediction failed: " + err.message);
-
-    btnTextEl.style.display = 'block';
-    spinnerEl.style.display = 'none';
-    analyzeBtn.disabled = false;
-    analyzeBtn.querySelector('.btn-text').innerText = "Analyze Image";
-  }
-}
 
         function displayResult(data) {
             const diseaseName = document.getElementById('diseaseName');
