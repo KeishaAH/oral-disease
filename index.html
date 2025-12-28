@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OralAI | Intelligent Diagnosis</title>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Friendly Medical Palette (Light Mode) */
+            --primary: #0ea5e9;       /* Sky Blue */
+            --primary-dark: #0284c7;  /* Darker Blue */
+            --secondary: #6366f1;     /* Indigo */
+            --success: #10b981;       /* Emerald */
+            --warning: #f59e0b;       /* Amber */
+            --danger: #ef4444;        /* Red */
+            
+            --bg-page: #f8fafc;       /* Very Light Slate */
+            --surface: #ffffff;       /* Pure White */
+            --text-main: #1e293b;     /* Slate 900 */
+            --text-muted: #64748b;    /* Slate 500 */
+            --border: #e2e8f0;        /* Light Border */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-page);
+            /* Soft, calming gradient */
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(14, 165, 233, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Main Card */
+        .app-container {
+            width: 100%;
+            max-width: 520px;
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.05), 
+                0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            background: rgba(14, 165, 233, 0.1);
+            width: 64px;
+            height: 64px;
+            line-height: 64px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Steps Indicator */
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .step { display: flex; align-items: center; gap: 5px; }
+        .step i { color: var(--primary); }
+
+        /* Upload Zone */
+        .upload-wrapper {
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fdfdfd;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(14, 165, 233, 0.03);
+            transform: translateY(-2px);
+        }
+
+        .icon-circle {
+            width: 50px;
+            height: 50px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .upload-zone:hover .icon-circle {
+            background: var(--primary);
+            color: white;
+        }
+
+        .icon-circle i {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+        
+        .upload-zone:hover .icon-circle i { color: white; }
+
+        .upload-text {
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-subtext {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .browse-btn {
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        
+        .upload-zone:hover .browse-btn {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Image Preview */
+        .preview-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #f8fafc;
+        }
+
+        #preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 10px;
+        }
+
+        /* Clear Button (X) */
+        .clear-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .clear-btn:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+            background: #fff5f5;
+        }
+
+        /* Analyze Button */
+        .analyze-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analyze-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .analyze-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Result Card */
+        .result-card {
+            margin-top: 1.5rem;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 0;
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
+            overflow: hidden;
+        }
+
+        .result-card.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .result-body {
+            padding: 1.5rem;
+        }
+
+        .diagnosis-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .diagnosis-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+        }
+
+        /* Confidence Meter */
+        .meter-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .meter-bg {
+            flex-grow: 1;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .confidence-val {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            width: 45px;
+            text-align: right;
+        }
+
+        /* Advice Box */
+        .advice-box {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .advice-icon {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        /* Status Colors */
+        .status-healthy { color: var(--success); background-color: rgba(16, 185, 129, 0.1); }
+        .status-warning { color: var(--warning); background-color: rgba(245, 158, 11, 0.1); }
+        .status-danger { color: var(--danger); background-color: rgba(239, 68, 68, 0.1); }
+
+        .fill-healthy { background: var(--success); }
+        .fill-warning { background: var(--warning); }
+        .fill-danger { background: var(--danger); }
+
+        /* Footer */
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding-top: 1rem;
+            border-top: 1px solid transparent;
+        }
+        
+        footer a { color: var(--primary); text-decoration: none; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="logo-icon">
+                <i class="fa-solid fa-tooth"></i>
+            </div>
+            <h1>OralAI Check</h1>
+            <p class="subtitle">AI-powered screening for oral health.</p>
+            
+            <div class="steps" style="margin-top: 1.5rem;">
+                <span class="step"><i class="fa-regular fa-image"></i> 1. Upload</span>
+                <span style="color: #cbd5e1;">&bull;</span>
+                <span class="step"><i class="fa-solid fa-microchip"></i> 2. Analyze</span>
+                <span style="color: #cbd5e1;">&bull;</span>
+                <span class="step"><i class="fa-solid fa-clipboard-check"></i> 3. Result</span>
+            </div>
+        </header>
+
+        <!-- Hidden Input -->
+        <input type="file" id="fileInput" accept="image/*" hidden>
+
+        <!-- Upload Zone -->
+        <div class="upload-wrapper">
+            <div class="upload-zone" id="dropZone">
+                <div class="upload-content" id="uploadPrompt">
+                    <div class="icon-circle">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <p class="upload-text">Drag & drop your intraoral photo</p>
+                    <p class="upload-subtext">or click to browse files</p>
+                    <button class="browse-btn">Select Image</button>
+                </div>
+                
+                <!-- Preview Layer -->
+                <div class="preview-container" id="previewContainer">
+                    <img id="previewImg" src="" alt="Preview">
+                    <button class="clear-btn" id="clearBtn" title="Remove image">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <button class="analyze-btn" id="analyzeBtn" onclick="predict()" disabled>
+            <span class="btn-text">Analyze Image</span>
+            <div class="spinner"></div>
+        </button>
+
+        <!-- Result Card -->
+        <div class="result-card" id="resultCard">
+            <div class="result-header">
+                <div class="status-indicator" id="statusDot"></div>
+                <div>
+                    <p class="diagnosis-title">Analysis Result</p>
+                    <h2 class="diagnosis-value" id="diseaseName" style="margin:0; font-size: 1.2rem;">--</h2>
+                </div>
+            </div>
+            
+            <div class="result-body">
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">AI Confidence Level</p>
+                <div class="meter-container">
+                    <div class="meter-bg">
+                        <div class="meter-fill" id="confidenceBar"></div>
+                    </div>
+                    <span class="confidence-val" id="confidenceText">0%</span>
+                </div>
+
+                <div class="advice-box">
+                    <i class="fa-solid fa-user-doctor advice-icon" id="adviceIcon"></i>
+                    <div>
+                        <strong style="display:block; margin-bottom:4px; color:var(--text-main);">Recommendation</strong>
+                        <span id="adviceText">Please consult a dentist.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Disclaimer:</strong> This tool is for educational purposes only and does not replace professional dental advice.</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImg = document.getElementById('previewImg');
+        const uploadPrompt = document.getElementById('uploadPrompt');
+        const clearBtn = document.getElementById('clearBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultCard = document.getElementById('resultCard');
+        const spinner = document.querySelector('.spinner');
+        const btnText = document.querySelector('.btn-text');
+
+        // --- Event Listeners ---
+
+        // 1. Click to Upload
+        dropZone.addEventListener('click', (e) => {
+            // Prevent triggering if clicking clear button
+            if (e.target.closest('.clear-btn')) return;
+            fileInput.click();
+        });
+
+        // 2. Drag & Drop Visuals
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('dragover');
+            }, false);
+        });
+
+        // 3. Handle File Drop
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        });
+
+        // 4. Handle File Selection via Dialog
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+
+        // 5. Clear Image
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Stop bubbling to dropZone
+            resetUI();
+        });
+
+        // --- Functions ---
+
+        function handleFiles(files) {
+            if (files && files[0]) {
+                const file = files[0];
+                
+                // Validate Image
+                if (!file.type.startsWith('image/')) {
+                    alert('Please upload a valid image file.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    uploadPrompt.style.opacity = '0'; // Hide prompt
+                    analyzeBtn.disabled = false;
+                    
+                    // Hide previous results if any
+                    resultCard.classList.remove('active');
+                    analyzeBtn.innerHTML = '<span class="btn-text">Analyze Image</span><div class="spinner"></div>';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function resetUI() {
+            fileInput.value = '';
+            previewImg.src = '';
+            previewContainer.style.display = 'none';
+            uploadPrompt.style.opacity = '1';
+            analyzeBtn.disabled = true;
+            resultCard.classList.remove('active');
+            analyzeBtn.innerHTML = '<span class="btn-text">Analyze Image</span><div class="spinner"></div>';
+        }
+
+        // --- Main Prediction Logic (Simulated) ---
+        async function predict() {
+  if (analyzeBtn.disabled) return;
+  if (!fileInput.files || !fileInput.files[0]) {
+    alert("Please upload an image first.");
+    return;
+  }
+
+  // UI Loading State
+  const btnTextEl = analyzeBtn.querySelector('.btn-text');
+  const spinnerEl = analyzeBtn.querySelector('.spinner');
+
+  btnTextEl.style.display = 'none';
+  spinnerEl.style.display = 'block';
+  analyzeBtn.disabled = true;
+  resultCard.classList.remove('active');
+
+  try {
+    // CHANGE THIS when deployed:
+    const API_BASE = "http://localhost:8080";
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const res = await fetch(`${API_BASE}/predict?top_k=3`, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text);
+    }
+
+    const data = await res.json();
+
+    // Your backend returns: { top1: {class, prob}, topk: [...] }
+    const predClass = data.top1.class;
+    const confidence = (data.top1.prob * 100).toFixed(1);
+
+    displayResult({
+      class: predClass,
+      confidence: confidence
+    });
+
+    // Reset Button State
+    btnTextEl.style.display = 'block';
+    spinnerEl.style.display = 'none';
+    analyzeBtn.disabled = false;
+    analyzeBtn.querySelector('.btn-text').innerText = "Analyze Again";
+
+  } catch (err) {
+    console.error(err);
+    alert("Prediction failed: " + err.message);
+
+    btnTextEl.style.display = 'block';
+    spinnerEl.style.display = 'none';
+    analyzeBtn.disabled = false;
+    analyzeBtn.querySelector('.btn-text').innerText = "Analyze Image";
+  }
+}
+
+        function displayResult(data) {
+            const diseaseName = document.getElementById('diseaseName');
+            const confidenceText = document.getElementById('confidenceText');
+            const confidenceBar = document.getElementById('confidenceBar');
+            const adviceText = document.getElementById('adviceText');
+            const statusDot = document.getElementById('statusDot');
+            const adviceIcon = document.getElementById('adviceIcon');
+
+            // Set Data
+            diseaseName.innerText = data.class;
+            confidenceText.innerText = Math.round(data.confidence) + '%';
+            
+            // Color Coding Logic
+            confidenceBar.className = 'meter-fill'; // Reset classes
+            statusDot.className = 'status-indicator';
+            
+            if (data.class === 'Healthy') {
+                confidenceBar.classList.add('fill-healthy');
+                statusDot.style.background = 'var(--success)';
+                adviceIcon.className = 'fa-solid fa-check-circle advice-icon';
+                adviceIcon.style.color = 'var(--success)';
+                adviceText.innerText = "No visible issues detected. Keep up your oral hygiene routine!";
+            } else {
+                // Sick
+                if (data.confidence < 80) {
+                    confidenceBar.classList.add('fill-warning');
+                    statusDot.style.background = 'var(--warning)';
+                    adviceIcon.className = 'fa-solid fa-triangle-exclamation advice-icon';
+                    adviceIcon.style.color = 'var(--warning)';
+                    adviceText.innerText = `Possible ${data.class}. Visit a dentist for a visual examination.`;
+                } else {
+                    confidenceBar.classList.add('fill-danger');
+                    statusDot.style.background = 'var(--danger)';
+                    adviceIcon.className = 'fa-solid fa-user-doctor advice-icon';
+                    adviceIcon.style.color = 'var(--danger)';
+                    adviceText.innerText = `High probability of ${data.class}. We recommend scheduling an appointment.`;
+                }
+            }
+
+            // Show Card
+            resultCard.classList.add('active');
+
+            // Animate Bar Width
+            setTimeout(() => {
+                confidenceBar.style.width = data.confidence + '%';
+            }, 100);
+            
+            // Scroll to result on mobile
+            if(window.innerWidth < 600) {
+                resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    </script>
+</body>
+</html>
