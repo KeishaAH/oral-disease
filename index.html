@@ -411,6 +411,54 @@
         
         footer a { color: var(--primary); text-decoration: none; }
 
+        /* Loading Popup Modal */
+        .loading-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(2px);
+        }
+
+        .loading-modal.active {
+            display: flex;
+        }
+
+        .loading-box {
+            width: min(360px, 90vw);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid rgba(14, 165, 233, 0.25);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loading-title {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+        }
+
+        .loading-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
     </style>
 </head>
 <body>
@@ -497,6 +545,15 @@
         </footer>
     </div>
 
+    <!-- Loading Popup Modal -->
+    <div class="loading-modal" id="loadingModal" aria-hidden="true">
+      <div class="loading-box">
+        <div class="loading-spinner"></div>
+        <div class="loading-title">Analysing the Image</div>
+        <div class="loading-subtitle">Please wait a moment...</div>
+      </div>
+    </div>
+
     <script>
         // DOM Elements
         const dropZone = document.getElementById('dropZone');
@@ -509,6 +566,18 @@
         const resultCard = document.getElementById('resultCard');
         const spinner = document.querySelector('.spinner');
         const btnText = document.querySelector('.btn-text');
+
+        const loadingModal = document.getElementById('loadingModal');
+
+        function showLoadingModal() {
+            loadingModal.classList.add('active');
+            loadingModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function hideLoadingModal() {
+            loadingModal.classList.remove('active');
+            loadingModal.setAttribute('aria-hidden', 'true');
+        }
 
         // --- Event Listeners ---
 
@@ -603,6 +672,8 @@
             analyzeBtn.disabled = true;
             resultCard.classList.remove('active');
 
+            showLoadingModal();
+
             try {
                 const file = fileInput.files[0];
                 const formData = new FormData();
@@ -625,6 +696,9 @@
             } catch (err) {
                 alert(err.message);
             } finally {
+                hideLoadingModal();
+
+
                 btnTextEl.style.display = 'block';
                 spinnerEl.style.display = 'none';
                 analyzeBtn.disabled = false;
