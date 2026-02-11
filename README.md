@@ -37,6 +37,14 @@ The system will always output one of these six classes only.
 
 ---
 
+## 📸 Website Screenshots
+
+![Homepage](assets/homepage.jpeg)
+![Upload](assets/2.jpeg)
+![Result](assets/3.jpeg)
+
+---
+
 ## 🚀 How to Use the Website
 
 ### Step 1 – Upload Image
