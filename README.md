@@ -75,7 +75,7 @@ Analysis Result: Calculus
 AI Confidence Level: 59%  
 Recommendation: Possible Calculus. Visit a dentist for visual examination.
 
-You may click **Analyze Again** to test another image.
+You may click **Analyze Again** to re-analyze the same image. Click the "x" button to replace the image with another image you want to analyze.
 
 ---
 
